@@ -39,7 +39,7 @@ const DeleteQuizQuestion = async (req, res, next) => {
     }
     await question.delete()
     res.status(200).json({
-        success: true,
+        success: true,  
         msg: "product is deleted successfully"
     })
 
@@ -48,17 +48,20 @@ const DeleteQuizQuestion = async (req, res, next) => {
 
 const submitCompleteQuiz = async (req, res)=>{
     
-    const { quiz, Score, Course, Student } = req.body
+    const { quiz, Score, Course } = req.body
 
-    if (!quiz || !Score || !Course || !Student ) {
+    if (!quiz || !Score || !Course ) {
         return res.status(500).json({ "msg": "Invalid Data" })
-    }
-
-    await AttemptQuiz.create({quiz, Score, Course, Student }).then((result) => {
+    }   
+    
+    await AttemptQuiz.create({quiz, Score, Course, Student:[
+        {id:req.user?.id,name:req.user?.name,email:req.user?.email} ] 
+    }).then((result) => {
         res.status(201).json({ "result": result,"Success":true })
     }).catch((err) => {
         res.status(500).json({ "msg": err })
     });
+
 }
 
 const getAllSubmittedQuiz = async (req, res) => {
