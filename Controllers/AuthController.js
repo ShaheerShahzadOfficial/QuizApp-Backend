@@ -1,60 +1,34 @@
 import User from "../Models/UserSchema.js"
-import bcrypt from "bcrypt"
 import jsonwebtoken from "jsonwebtoken"
+import { stringToHash,varifyHash } from "bcrypt-inzi";
 
 // //  😊😊  SignUp Form Started 😘😘
-
 
 const RegisterUser = async (req, res, next) => {
     let { name, email, password } = req.body
 
-const findUser = await User.findOne({email})
-if (findUser) {
-return(
-    res.status(500).json({
-        msg: ` User Already Exist with this Email `
-    })
-)
-}
-
-    const SALT_ROUND = 10
-    await bcrypt.hash(password, SALT_ROUND, async (err, hash) => {
-        if (err) {
-            return (
-                res.status(500).json({
-                    msg: ` ${err.message} `
-                })
-            )
-        } else {
-                 await User.create({
-                name, email, password: hash,
-            }).then((result) => {
-                res.status(201).json({
-                    success: true,
-                    email: result.email,
-                    name: result.name,
-                    createdAt: result.createdAt,
-                    message: "Login Successfull",
-                    role: result.role,
-                    message: " Registeration Successful  "
-                })
-            }).catch((err) => {
-              
-                res.status(500).json({
-                    message: err.message
-                })
-            });
-        }
-    })
+    const find =  await User.findOne({email})
+    if(find) {
+      return res.status(401).json({"msg":"You Are Already a User"})  
+    }
+    stringToHash(password).then( async hash => {
+        req.body.password = hash
+        await User.create(req.body).then((result) => {  
+           res.status(201).json({"msg":"Registeration Successfully",
+           "user":result})
+        }).catch((err) => {
+           res.status(500).json({"msg":err})
+        });
+     
+     })  
 }
 
 // //  🙋🏻‍♀️🙋🏻‍♀️  SignUp Form Ended 🙋🏻‍♀️🙋🏻‍♀️
 
-// 
 
 // //  😊😊  SignIn Form Started 😘😘
 
-const Login = async (req, res, next) => {
+const Login = async (req, res) => {
     let { email, password } = req.body
 
     if (!email || !password) {
@@ -63,59 +37,47 @@ const Login = async (req, res, next) => {
         )
     }
 
-
-    const userFound = await User.findOne({ email })
-        .then(async (user) => {
-            bcrypt.compare(password, user.password, (error, result) => {
-                if (result) {
-                    const token = jsonwebtoken.sign(
-                        {
-                            email,
-                            name: user.name,
-                            role: user.role,
-                            id: user._id
-                        },
-                        process.env.ACCESS_TOKEN,
-                        {
-                            expiresIn: process.env.EXPIRES_IN
-                        }
-                    )
-
-                    res.cookie('authToken', token, {
-                        expires: new Date(
-                            Date.now() + process.env.COOKIE_EXPIRE * 24 * 60 * 60 * 1000),
-                        httpOnly: false,
-                        maxAge: 120 * 60 * 60 * 1000,
-                    })
-
-
-                    res.status(200).json({
-                        token,
-                        email,
-                        name: user.name,
-                        avatar: user.avatar,
-                        createdAt: user.createdAt,
-                        message: "Login Successfull",
-                        role: user.role,
-
-                    })
-
-
-
-                }
-                if (!result) {
-                    res.status(401).json({
-                        msg: "Email or Password not matched",
-                    })
-                }
-
-
+    const user = await User.findOne({ email })
+    if (!user) {
+       return res.status(401).json({ "msg": "You Are Not Registered User" })
+    }
+ 
+    varifyHash(password, user.password).then(async result => {
+       if (result) {
+        const token = jsonwebtoken.sign(
+            {
+                email,
+                name: user.name,
+                role: user.role,
+                id: user._id
+            },
+            process.env.ACCESS_TOKEN,
+            {
+                expiresIn: process.env.EXPIRES_IN
+            }
+        )
+ 
+             res.cookie('authToken', token, {
+                expires: new Date(
+                    Date.now() + process.env.COOKIE_EXPIRE * 24 * 60 * 60 * 1000),
+                httpOnly: false,
+                maxAge: 120 * 60 * 60 * 1000,
             })
-        }).catch(err => {
-            res.status(400).json({
-                message: err.message
-            })
-        })
+
+ 
+          res.status(200).json({
+             msg: "You Are Logged In Successfully",
+             "token": token,
+             user:user
+          })
+ 
+       } else {
+          res.status(500).json({ "msg": "Email Or Password Doesn't Match" })
+       }
+    }).catch(e => {
+       console.log("error: ", e)
+    })
+
 }
 
 //   SignIn Form Ended 
@@ -130,8 +92,20 @@ const Logout = async (req, res, next) => {
         .json({ message: "Successfully logged out 😏 🍀" });
 }
 
+
+const GetUserDetail = async (req, res, next) => {
+
+    const user = await User.findById(req.user.id)
+    res.status(200).json({
+        success: true,
+        user
+    })
+
+}
+
 export {
     RegisterUser,
     Login,
-    Logout
+    Logout,
+    GetUserDetail
 }

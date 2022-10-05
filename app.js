@@ -5,6 +5,7 @@ import cookieParser from "cookie-parser";
 import fileUpload from "express-fileupload"
 import authRoute from "./Routes/AuthRoute.js";
 import SuperAdminRoute from "./Routes/SuperAdmin.js";
+import QuizRoute from "./Routes/QuizRoute.js";
 
 const app = express()
 
@@ -21,7 +22,7 @@ app.use(bodyParser.json({ limit: '100mb' }));
 app.use(bodyParser.urlencoded({ limit: '100mb', extended: true }));
 
 app.use(cookieParser());
-app.use(fileUpload({ useTempFiles: true }))
+// app.use(fileUpload({ useTempFiles: true }))
 
 
 app.get('/', (req, res) => {
@@ -32,7 +33,7 @@ app.get('/', (req, res) => {
 
 app.use("/auth",authRoute)
 app.use("/superAdmin",SuperAdminRoute)
-
+app.use("/quiz",QuizRoute)
 
 
 // Error  🤦‍♂️🤦‍♂️
