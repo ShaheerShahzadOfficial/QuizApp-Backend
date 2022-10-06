@@ -12,6 +12,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@vercel/node": "^2.5.22",
     "bcrypt": "^5.0.1",
     "bcrypt-inzi": "^1.0.7",
     "body-parser": "^1.20.0",
