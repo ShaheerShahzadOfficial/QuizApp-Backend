@@ -6,7 +6,7 @@ const QuizRoute = express.Router()
 
 QuizRoute.route("/AddQuiz").post(createQuizQuestion)
 QuizRoute.route("/getQuiz").get(getQuiz)
-QuizRoute.route("/deleteQuiz").delete(DeleteQuizQuestion)
+QuizRoute.route("/deleteQuiz/:id").delete(DeleteQuizQuestion)
 QuizRoute.route("/submitCompleteQuiz").post(checkToken,submitCompleteQuiz)
 QuizRoute.route("/AllAnswer").get(getAllSubmittedQuiz)
 QuizRoute.route("/getQuizByCategories/:id").get(getQuizByCategories)

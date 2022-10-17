@@ -5,7 +5,7 @@ dotenv.config()
 const DBConnection = () => {
      const url = process.env.DB_URI
     mongoose.connect(url, { useNewUrlParser: true }).then((result) => {
-        console.log(`DATABASE CONNECTED WITH THE HOST ${result.connection.host}`)
+        console.log(`DATABASE CONNECTED with ${result.connection.host}`)
     })
 }
 

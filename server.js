@@ -14,5 +14,5 @@ DBConnection()
 
 const port = process.env.PORT || 4000
 Server.listen(port, () => {
-    console.log(`Server is Running On ${port}`)
+    console.log(`Server is Running On http://localhost:${port}/`)
 })
